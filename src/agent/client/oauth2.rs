@@ -34,6 +34,8 @@ impl OAuth2Client {
             refresh_token: result.refresh_token().map(|t| t.secret().to_string()),
             expires: expires(result.expires_in()),
             #[cfg(feature = "openid")]
+            id_token: None,
+            #[cfg(feature = "openid")]
             claims: None,
         })
     }

@@ -187,6 +187,7 @@ impl Client for OpenIdClient {
         Ok((
             OAuth2Context::Authenticated(Authentication {
                 access_token: result.access_token().secret().to_string(),
+                id_token: Some(id_token.to_string()),
                 refresh_token: result.refresh_token().map(|t| t.secret().to_string()),
                 expires: expires(result.expires_in()),
                 claims: Some(claims.clone()),
@@ -209,11 +210,16 @@ impl Client for OpenIdClient {
                 OAuth2Error::LoginResult(format!("failed to exchange refresh token: {err}"))
             })?;
 
+        let id_token = result.extra_fields().id_token().ok_or_else(|| {
+            OAuth2Error::LoginResult("Server did not return an ID token".to_string())
+        })?;
+
         Ok((
             OAuth2Context::Authenticated(Authentication {
                 access_token: result.access_token().secret().to_string(),
                 refresh_token: result.refresh_token().map(|t| t.secret().to_string()),
                 expires: expires(result.expires_in()),
+                id_token: Some(id_token.to_string()),
                 claims: Some(session_state.1.clone()),
             }),
             session_state,

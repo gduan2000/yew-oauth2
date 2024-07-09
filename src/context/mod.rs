@@ -23,6 +23,8 @@ pub struct Authentication {
     pub access_token: String,
     /// An optional refresh token
     pub refresh_token: Option<String>,
+    #[cfg(feature = "openid")]
+    pub id_token: Option<String>,
     /// OpenID claims
     #[cfg(feature = "openid")]
     pub claims: Option<Rc<Claims>>,
@@ -62,6 +64,12 @@ impl OAuth2Context {
     /// Get the access token, if the context is [`OAuth2Context::Authenticated`]
     pub fn access_token(&self) -> Option<&str> {
         self.authentication().map(|auth| auth.access_token.as_str())
+    }
+
+    #[cfg(feature = "openid")]
+    pub fn id_token(&self) -> Option<String> {
+        self.authentication()
+            .map(|auth| auth.id_token.clone().unwrap_or("".to_string()))
     }
 
     /// Get the claims, if the context is [`OAuth2Context::Authenticated`]
